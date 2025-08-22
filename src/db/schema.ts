@@ -7,10 +7,51 @@ import {
   pgEnum,
 } from "drizzle-orm/pg-core";
 import { drizzle } from "drizzle-orm/node-postgres";
+import { Pool } from "pg";
 
 import type { UIMessage } from "ai";
 
-export const db = drizzle(process.env.DATABASE_URL!);
+let dbInstance: any = null;
+let connectionError: Error | null = null;
+
+export function getDb() {
+  if (connectionError) {
+    throw connectionError;
+  }
+  
+  if (!dbInstance) {
+    try {
+      if (!process.env.DATABASE_URL) {
+        throw new Error("DATABASE_URL environment variable is not set");
+      }
+      
+      const pool = new Pool({
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      });
+      
+      dbInstance = drizzle(pool);
+    } catch (error) {
+      connectionError = error as Error;
+      console.error("Failed to initialize database:", error);
+      throw error;
+    }
+  }
+  return dbInstance;
+}
+
+// Keep the old export for backward compatibility, but make it lazy
+export const db = new Proxy({}, {
+  get(target, prop) {
+    try {
+      const dbClient = getDb();
+      return dbClient[prop];
+    } catch (error) {
+      console.error("Database operation failed:", error);
+      throw error;
+    }
+  }
+});
 
 export const appsTable = pgTable("apps", {
   id: uuid("id").primaryKey().defaultRandom(),
