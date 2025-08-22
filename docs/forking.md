@@ -1,80 +1,87 @@
 # Forking Guide
 
-This documentation is for developers who want to work with the Adorable codebase. It's a good starting place to experiment with building your own AI-powered app builder.
+This guide will help you fork and customize this codebase for your own AI app builder.
 
-For additional context on building app builders with AI, see the [Freestyle guide on Building an App Builder](https://docs.freestyle.sh/guides/app-builder).
+For additional context on building app builders with AI, see the [Mosaic guide on Building an App Builder](https://docs.mosaic.dev/guides/app-builder).
 
-## This is where the prompt goes
+## Overview
 
-The system prompt is located in `src/lib/system.ts` and exported as `SYSTEM_MESSAGE`.
+This project is an AI app builder that allows users to create applications through natural language conversations. It's built with:
 
-**Tips for updating the system prompt:**
+- **Frontend**: Next.js 14, React, TypeScript, Tailwind CSS
+- **Backend**: Node.js, PostgreSQL (via Drizzle ORM), Redis
+- **AI**: Anthropic Claude, Mosaic MCP tools
+- **Auth**: Stack Auth
+- **Deployment**: Mosaic platform
 
-- Keep instructions clear and specific
-- Test changes by creating a new app to see how the AI behaves
-- The prompt defines the AI's personality and workflow preferences
-- Consider adding domain-specific guidance for your use case
+## Key Components
 
-## This is where the tools go
+### 1. Chat Interface (`src/components/chat.tsx`)
+The main chat component that handles user interactions and displays AI responses.
 
-Tools are located in the `src/tools/` directory. Each tool is a Mastra tool created with `createTool()`.
+### 2. AI Service (`src/lib/internal/ai-service.ts`)
+Core AI logic that processes user messages and manages tool invocations.
 
-**Existing tools:**
+### 3. Stream Manager (`src/lib/internal/stream-manager.ts`)
+Handles streaming responses and manages chat state.
 
-- `todo-tool.ts` - Manages todo lists for the AI agent to track tasks
-- `morph-tool.ts` - File editing tool that uses Morph API for code modifications
+### 4. App Management (`src/actions/`)
+Actions for creating, managing, and deploying applications.
 
-**Adding new tools:**
+## Customization Points
 
-1. Create a new file in `src/tools/`
-2. Export the tool using Mastra's `createTool()` function
-3. Import and add it to the `tools` object in `src/mastra/agents/builder.ts`
+### Branding
+- Update `src/app/page.tsx` to change the main landing page
+- Modify `src/components/topbar.tsx` for header customization
+- Update logos in `public/logos/` directory
 
-The tools are automatically available to the AI agent through the chat API in `src/app/api/chat/route.ts`.
+### Templates
+- Modify `src/lib/templates.ts` to add/remove app templates
+- Update template metadata and repository URLs
 
-Add context, web search, databases or any other tools to supercharge the AI's capabilities and make it more useful for your specific app-building needs.
+### AI Behavior
+- Customize `src/lib/system.ts` to change the AI's system prompt
+- Modify `src/lib/templates.ts` for different AI instructions
 
-## This is where the model goes
-
-The AI model configuration is in `src/lib/model.ts`.
-
-By default, we use Claude 4 Sonnet, but GPT-5 and Claude 4 Opus also work well.
-
-## This is where the UI goes
-
-**Important UI files:**
-
-- `src/app/page.tsx` - Main landing page with prompt input and examples
-- `src/app/app/[id]/page.tsx` - Individual app chat interface
-- `src/components/chat.tsx` - Main chat component for AI interactions
-- `src/components/ui/` - Reusable UI components (buttons, inputs, etc.)
-- `src/components/user-apps.tsx` - User's app list display
-- `src/components/webview.tsx` - App preview iframe component
-
-## Where the database stuff goes
-
-**Database configuration:**
-
-- `src/db/schema.ts` - Database schema definitions and db connection
-- Server actions in `src/actions/` handle database operations
-- Use Drizzle ORM for type-safe database queries
-- Run `npx drizzle-kit push` to apply schema changes
-
-## Database Schema
-
-The database schema is defined in `src/db/schema.ts` and includes:
-
-- `appsTable` - Application metadata
-- `appUsers` - User permissions for apps
-- `messagesTable` - Chat message history
-- `appDeployments` - Deployment tracking
+### Styling
+- Update `tailwind.config.ts` for theme customization
+- Modify `src/app/globals.css` for global styles
 
 ## Environment Variables
 
 Required environment variables:
 
 - `DATABASE_URL` - PostgreSQL connection string
+- `ANTHROPIC_API_KEY` - Anthropic API key for Claude
+- `MORPH_API_KEY` - Mosaic platform key
 - `REDIS_URL` - Redis connection string
-- `ANTHROPIC_API_KEY` - Claude API key
-- `FREESTYLE_API_KEY` - Freestyle platform key
-- Stack Auth variables (see README.md)
+- `NEXT_PUBLIC_STACK_PROJECT_ID` - Stack Auth project ID
+- `NEXT_PUBLIC_STACK_PUBLISHABLE_CLIENT_KEY` - Stack Auth publishable key
+- `STACK_SECRET_SERVER_KEY` - Stack Auth secret key
+- `PREVIEW_DOMAIN` - Domain for app previews
+
+## Database Schema
+
+The main tables are defined in `src/db/schema.ts`:
+
+- `users` - User accounts and authentication
+- `apps` - User applications and metadata
+- `chats` - Chat conversations and history
+
+## Deployment
+
+1. Set up your environment variables
+2. Run database migrations: `npm run db:push`
+3. Build the application: `npm run build`
+4. Deploy to your preferred platform
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

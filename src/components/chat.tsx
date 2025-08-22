@@ -25,8 +25,9 @@ export default function Chat(props: {
     queryFn: async () => {
       return chatState(props.appId);
     },
-    refetchInterval: 1000,
-    refetchOnWindowFocus: true,
+    refetchInterval: 5000, // Reduced from 1000ms to 5000ms
+    refetchOnWindowFocus: false, // Changed from true to false
+    staleTime: 2000, // Add stale time to prevent unnecessary refetches
   });
 
   const { messages, sendMessage } = useChatSafe({
@@ -110,9 +111,22 @@ export default function Chat(props: {
         style={{ overflowAnchor: "auto" }}
       >
         <ChatContainer autoScroll>
-          {messages.map((message: any) => (
-            <MessageBody key={message.id} message={message} />
-          ))}
+          {messages.map((message: any, messageIndex: number) => {
+            // Debug: Log message structure to identify duplicate key issues
+            console.log(`Message ${messageIndex}:`, {
+              id: message.id,
+              role: message.role,
+              partsCount: message.parts?.length || 0
+            });
+            
+            return (
+              <MessageBody 
+                key={`${message.id || `msg-${messageIndex}`}-${message.role}`} 
+                message={message} 
+                messageIndex={messageIndex}
+              />
+            );
+          })}
         </ChatContainer>
       </div>
       <div className="flex-shrink-0 p-3 transition-all bg-background md:backdrop-blur-sm">
@@ -131,20 +145,20 @@ export default function Chat(props: {
   );
 }
 
-function MessageBody({ message }: { message: any }) {
+function MessageBody({ message, messageIndex }: { message: any; messageIndex: number }) {
   if (message.role === "user") {
     return (
       <div className="flex justify-end py-1 mb-4">
         <div className="bg-neutral-200 dark:bg-neutral-700 rounded-xl px-4 py-1 max-w-[80%] ml-auto">
           {message.parts.map((part: any, index: number) => {
             if (part.type === "text") {
-              return <div key={index}>{part.text}</div>;
+              return <div key={`${messageIndex}-${message.id || 'no-id'}-text-${index}`}>{part.text}</div>;
             } else if (
               part.type === "file" &&
               part.mediaType?.startsWith("image/")
             ) {
               return (
-                <div key={index} className="mt-2">
+                <div key={`${messageIndex}-${message.id || 'no-id'}-image-${index}`} className="mt-2">
                   <Image
                     src={part.url as string}
                     alt="User uploaded image"
@@ -156,7 +170,7 @@ function MessageBody({ message }: { message: any }) {
                 </div>
               );
             }
-            return <div key={index}>unexpected message</div>;
+            return <div key={`${messageIndex}-${message.id || 'no-id'}-unknown-${index}`}>unexpected message</div>;
           })}
         </div>
       </div>
@@ -169,7 +183,7 @@ function MessageBody({ message }: { message: any }) {
         {message.parts.map((part: any, index: any) => {
           if (part.type === "text") {
             return (
-              <div key={index} className="mb-4">
+              <div key={`${messageIndex}-${message.id || 'no-id'}-text-${index}`} className="mb-4">
                 <Markdown className="prose prose-sm dark:prose-invert max-w-none">
                   {part.text}
                 </Markdown>
@@ -178,34 +192,7 @@ function MessageBody({ message }: { message: any }) {
           }
 
           if (part.type.startsWith("tool-")) {
-            // if (
-            //   part.toolInvocation.state === "result" &&
-            //   part.toolInvocation.result.isError
-            // ) {
-            //   return (
-            //     <div
-            //       key={index}
-            //       className="border-red-500 border text-sm text-red-800 rounded bg-red-100 px-2 py-1 mt-2 mb-4"
-            //     >
-            //       {part.toolInvocation.result?.content?.map(
-            //         (content: { type: "text"; text: string }, i: number) => (
-            //           <div key={i}>{content.text}</div>
-            //         )
-            //       )}
-            //       {/* Unexpectedly failed while using tool{" "}
-            //       {part.toolInvocation.toolName}. Please try again. again. */}
-            //     </div>
-            //   );
-            // }
-
-            // if (
-            //   message.parts!.length - 1 == index &&
-            //   part.toolInvocation.state !== "result"
-            // ) {
-            return <ToolMessage key={index} toolInvocation={part} />;
-            // } else {
-            //   return undefined;
-            // }
+            return <ToolMessage key={`${messageIndex}-${message.id || 'no-id'}-tool-${index}`} toolInvocation={part} />;
           }
         })}
       </div>

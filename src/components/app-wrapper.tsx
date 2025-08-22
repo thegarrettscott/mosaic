@@ -92,7 +92,7 @@ export default function AppWrapper({
               }
               appId={appId}
               initialMessages={initialMessages}
-              key={appId}
+              key={`chat-${appId}-${baseId}`}
               running={running}
             />
           </QueryClientProvider>

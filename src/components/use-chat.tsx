@@ -14,6 +14,9 @@ export function useChatSafe(
   const id = options.id;
   const resume = options?.resume;
 
+  // Debug: Log when the hook is called
+  console.log(`useChatSafe called for app: ${id}, resume: ${resume}`);
+
   options.resume = undefined;
 
   const onFinish = options.onFinish;
@@ -28,12 +31,14 @@ export function useChatSafe(
 
   useEffect(() => {
     if (!runningChats.has(id) && resume) {
+      console.log(`Starting new stream for app: ${id}`);
       chat.resumeStream();
       runningChats.add(id);
     }
 
     return () => {
       if (runningChats.has(id)) {
+        console.log(`Stopping stream for app: ${id}`);
         chat.stop().then(() => {
           runningChats.delete(id);
         });

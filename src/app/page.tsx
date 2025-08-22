@@ -1,8 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { PromptInput, PromptInputActions } from "@/components/ui/prompt-input";
-import { FrameworkSelector } from "@/components/framework-selector";
 import Image from "next/image";
 import LogoSvg from "@/logo.svg";
 import { useState } from "react";
@@ -11,22 +9,17 @@ import { ExampleButton } from "@/components/ExampleButton";
 import { UserButton } from "@stackframe/stack";
 import { UserApps } from "@/components/user-apps";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { PromptInputTextareaWithTypingAnimation } from "@/components/prompt-input";
+
 
 const queryClient = new QueryClient();
 
 export default function Home() {
-  const [prompt, setPrompt] = useState("");
-  const [framework, setFramework] = useState("nextjs");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleSubmit = async () => {
+  const handleOpenInbox = async () => {
     setIsLoading(true);
-
-    router.push(
-      `/app/new?message=${encodeURIComponent(prompt)}&template=${framework}`
-    );
+    router.push(`/app/new?message=Loading Inbox&template=superhuman`);
   };
 
   return (
@@ -34,12 +27,12 @@ export default function Home() {
       <main className="min-h-screen p-4 relative">
         <div className="flex w-full justify-between items-center">
           <h1 className="text-lg font-bold flex-1 sm:w-80">
-            <a href="https://www.freestyle.sh">freestyle.sh</a>
+            <a href="https://www.mosaic.dev">mosaic.dev</a>
           </h1>
           <Image
             className="dark:invert mx-2"
             src={LogoSvg}
-            alt="Adorable Logo"
+            alt="Mosaic Email Logo"
             width={36}
             height={36}
           />
@@ -51,55 +44,30 @@ export default function Home() {
         <div>
           <div className="w-full max-w-lg px-4 sm:px-0 mx-auto flex flex-col items-center mt-16 sm:mt-24 md:mt-32 col-start-1 col-end-1 row-start-1 row-end-1 z-10">
             <p className="text-neutral-600 text-center mb-6 text-3xl sm:text-4xl md:text-5xl font-bold">
-              Let AI Cook
+              Welcome to Mosaic
             </p>
 
-            <div className="w-full relative my-5">
-              <div className="relative w-full max-w-full overflow-hidden">
-                <div className="w-full bg-accent rounded-md relative z-10 border transition-colors">
-                  <PromptInput
-                    leftSlot={
-                      <FrameworkSelector
-                        value={framework}
-                        onChange={setFramework}
-                      />
-                    }
-                    isLoading={isLoading}
-                    value={prompt}
-                    onValueChange={setPrompt}
-                    onSubmit={handleSubmit}
-                    className="relative z-10 border-none bg-transparent shadow-none focus-within:border-gray-400 focus-within:ring-1 focus-within:ring-gray-200 transition-all duration-200 ease-in-out "
-                  >
-                    <PromptInputTextareaWithTypingAnimation />
-                    <PromptInputActions>
-                      <Button
-                        variant={"ghost"}
-                        size="sm"
-                        onClick={handleSubmit}
-                        disabled={isLoading || !prompt.trim()}
-                        className="h-7 text-xs"
-                      >
-                        <span className="hidden sm:inline">
-                          Start Creating ⏎
-                        </span>
-                        <span className="sm:hidden">Create ⏎</span>
-                      </Button>
-                    </PromptInputActions>
-                  </PromptInput>
-                </div>
-              </div>
+            <div className="w-full relative my-5 flex justify-center">
+              <Button
+                onClick={handleOpenInbox}
+                disabled={isLoading}
+                size="lg"
+                className="w-64 h-12 text-base font-semibold"
+              >
+                {isLoading ? "Opening..." : "Open your first inbox"}
+              </Button>
             </div>
-            <Examples setPrompt={setPrompt} />
+            <Examples />
             <div className="mt-8 mb-16">
               <a
-                href="https://freestyle.sh"
+                href="https://mosaic.dev"
                 className="border rounded-md px-4 py-2 mt-4 text-sm font-semibold transition-colors duration-200 ease-in-out cursor-pointer w-full max-w-72 text-center block"
               >
                 <span className="block font-bold">
-                  By <span className="underline">freestyle.sh</span>
+                  By <span className="underline">mosaic.dev</span>
                 </span>
                 <span className="text-xs">
-                  JavaScript infrastructure for AI.
+                  AI-powered inbox customization platform.
                 </span>
               </a>
             </div>
@@ -113,32 +81,36 @@ export default function Home() {
   );
 }
 
-function Examples({ setPrompt }: { setPrompt: (text: string) => void }) {
+function Examples() {
   return (
     <div className="mt-2">
       <div className="flex flex-wrap justify-center gap-2 px-2">
         <ExampleButton
-          text="Dog Food Marketplace"
-          promptText="Build a dog food marketplace where users can browse and purchase premium dog food."
+          text="Customize Inbox"
+          promptText="I want to customize my inbox layout and colors."
           onClick={(text) => {
             console.log("Example clicked:", text);
-            setPrompt(text);
           }}
         />
         <ExampleButton
-          text="Personal Website"
-          promptText="Create a personal website with portfolio, blog, and contact sections."
+          text="Add Email Filters"
+          promptText="Help me set up email filtering and organization rules."
           onClick={(text) => {
             console.log("Example clicked:", text);
-            setPrompt(text);
           }}
         />
         <ExampleButton
-          text="Burrito B2B SaaS"
-          promptText="Build a B2B SaaS for burrito shops to manage inventory, orders, and delivery logistics."
+          text="Keyboard Shortcuts"
+          promptText="I want to add custom keyboard shortcuts for email actions."
           onClick={(text) => {
             console.log("Example clicked:", text);
-            setPrompt(text);
+          }}
+        />
+        <ExampleButton
+          text="Email Templates"
+          promptText="Create some email response templates for common inquiries."
+          onClick={(text) => {
+            console.log("Example clicked:", text);
           }}
         />
       </div>

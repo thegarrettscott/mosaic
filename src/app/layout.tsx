@@ -18,8 +18,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Adorable",
-  description: "Open Source AI App Builder",
+  title: "Mosaic Email",
+  description: "Mosaic makes it easy to create your perfect email app",
   manifest: "/manifest.json",
   // viewport: {
   //   width: "device-width",
