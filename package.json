@@ -19,7 +19,6 @@
     "@mastra/mcp": "^0.10.12",
     "@mastra/memory": "^0.13.1",
     "@modelcontextprotocol/sdk": "^1.10.1",
-    "@next/swc-darwin-arm64": "^15.5.0",
     "@radix-ui/react-dialog": "^1.1.13",
     "@radix-ui/react-dropdown-menu": "^2.1.12",
     "@radix-ui/react-label": "^2.1.3",
