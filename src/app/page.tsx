@@ -1,7 +1,6 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -29,13 +28,6 @@ export default function Home() {
           <h1 className="text-lg font-bold flex-1 sm:w-80">
             <a href="https://www.mosaic.dev">mosaic.dev</a>
           </h1>
-          <Image
-            className="dark:invert mx-2"
-            src={LogoSvg}
-            alt="Mosaic Email Logo"
-            width={36}
-            height={36}
-          />
           <div className="flex items-center gap-2 flex-1 sm:w-80 justify-end">
             <UserButton />
           </div>
