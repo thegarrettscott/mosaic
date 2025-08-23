@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ExampleButton } from "@/components/ExampleButton";
-import { UserButton } from "@stackframe/stack";
+import { AuthButton } from "@/components/auth-button";
 import { UserApps } from "@/components/user-apps";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -29,7 +29,7 @@ export default function Home() {
             <a href="https://www.mosaic.dev">mosaic.dev</a>
           </h1>
           <div className="flex items-center gap-2 flex-1 sm:w-80 justify-end">
-            <UserButton />
+            <AuthButton />
           </div>
         </div>
 
