@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "postinstall": "rm -rf node_modules/@next/swc-darwin-* || true"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^2.0.0-beta.8",
