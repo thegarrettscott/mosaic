@@ -1,6 +1,6 @@
 import { createApp } from "@/actions/create-app";
 import { redirect } from "next/navigation";
-import { getUser } from "@/auth/stack-auth";
+import { getUser } from "@/lib/auth";
 
 // This page is never rendered. It is used to:
 // - Force user login without losing the user's initial message and template selection.

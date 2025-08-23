@@ -6,7 +6,7 @@ import { freestyle } from "@/lib/freestyle";
 import { db } from "@/db/schema";
 import { appUsers } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { getUser } from "@/auth/stack-auth";
+import { getUser } from "@/lib/auth";
 import { memory } from "@/mastra/agents/builder";
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/dist/client/link";

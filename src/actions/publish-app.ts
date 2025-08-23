@@ -1,6 +1,6 @@
 "use server";
 
-import { getUser } from "@/auth/stack-auth";
+import { getUser } from "@/lib/auth";
 import { appDeployments, appsTable, appUsers } from "@/db/schema";
 import { db } from "@/db/schema";
 import { freestyle } from "@/lib/freestyle";
