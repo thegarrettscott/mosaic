@@ -1,13 +1,28 @@
 import { createClient } from "redis";
 
-export const redis = await createClient({
-  url: process.env.REDIS_URL,
-})
-  .on("error", (err) => console.log("Redis Client Error", err))
-  .connect();
+let redis: any = null;
+let redisPublisher: any = null;
 
-export const redisPublisher = await createClient({
-  url: process.env.REDIS_URL,
-})
-  .on("error", (err) => console.log("Publisher Redis Client Error", err))
-  .connect();
+async function getRedisClient() {
+  if (!redis) {
+    redis = await createClient({
+      url: process.env.REDIS_URL,
+    })
+      .on("error", (err) => console.log("Redis Client Error", err))
+      .connect();
+  }
+  return redis;
+}
+
+async function getRedisPublisher() {
+  if (!redisPublisher) {
+    redisPublisher = await createClient({
+      url: process.env.REDIS_URL,
+    })
+      .on("error", (err) => console.log("Publisher Redis Client Error", err))
+      .connect();
+  }
+  return redisPublisher;
+}
+
+export { getRedisClient as redis, getRedisPublisher as redisPublisher };

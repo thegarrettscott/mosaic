@@ -27,7 +27,8 @@ export interface StreamInfo {
  * Get the current stream state for an app
  */
 export async function getStreamState(appId: string): Promise<StreamState> {
-  const state = await redisPublisher.get(`app:${appId}:stream-state`);
+  const redisPub = await redisPublisher();
+  const state = await redisPub.get(`app:${appId}:stream-state`);
   return { state };
 }
 
@@ -35,7 +36,8 @@ export async function getStreamState(appId: string): Promise<StreamState> {
  * Check if a stream is currently running for an app
  */
 export async function isStreamRunning(appId: string): Promise<boolean> {
-  const state = await redisPublisher.get(`app:${appId}:stream-state`);
+  const redisPub = await redisPublisher();
+  const state = await redisPub.get(`app:${appId}:stream-state`);
   return state === "running";
 }
 
@@ -43,11 +45,12 @@ export async function isStreamRunning(appId: string): Promise<boolean> {
  * Stop a running stream for an app
  */
 export async function stopStream(appId: string): Promise<void> {
-  await redisPublisher.publish(
+  const redisPub = await redisPublisher();
+  await redisPub.publish(
     `events:${appId}`,
     JSON.stringify({ type: "abort-stream" })
   );
-  await redisPublisher.del(`app:${appId}:stream-state`);
+  await redisPub.del(`app:${appId}:stream-state`);
 }
 
 /**
@@ -58,7 +61,8 @@ export async function waitForStreamToStop(
   maxAttempts: number = 60
 ): Promise<boolean> {
   for (let i = 0; i < maxAttempts; i++) {
-    const state = await redisPublisher.get(`app:${appId}:stream-state`);
+    const redisPub = await redisPublisher();
+    const state = await redisPub.get(`app:${appId}:stream-state`);
     if (!state) {
       return true;
     }
@@ -71,7 +75,8 @@ export async function waitForStreamToStop(
  * Clear the stream state for an app
  */
 export async function clearStreamState(appId: string): Promise<void> {
-  await redisPublisher.del(`app:${appId}:stream-state`);
+  const redisPub = await redisPublisher();
+  await redisPub.del(`app:${appId}:stream-state`);
 }
 
 /**
@@ -131,7 +136,8 @@ export async function setStream(
     );
   }
 
-  await redisPublisher.set(`app:${appId}:stream-state`, "running", {
+  const redisPub = await redisPublisher();
+  await redisPub.set(`app:${appId}:stream-state`, "running", {
     EX: 15,
   });
 
@@ -152,12 +158,14 @@ export async function setStream(
   return {
     response() {
       // Set up abort callback directly since this is a synchronous context
-      redis.subscribe(`events:${appId}`, (event) => {
-        const data = JSON.parse(event);
-        if (data.type === "abort-stream") {
-          console.log("cancelling http stream");
-          resumableStream?.cancel();
-        }
+      redis().then((redisClient: any) => {
+        redisClient.subscribe(`events:${appId}`, (event: any) => {
+          const data = JSON.parse(event);
+          if (data.type === "abort-stream") {
+            console.log("cancelling http stream");
+            resumableStream?.cancel();
+          }
+        });
       });
 
       return new Response(resumableStream, {
@@ -181,7 +189,8 @@ export async function setupAbortCallback(
   appId: string,
   callback: () => void
 ): Promise<void> {
-  redis.subscribe(`events:${appId}`, (event) => {
+  const redisClient = await redis();
+  redisClient.subscribe(`events:${appId}`, (event: any) => {
     const data = JSON.parse(event);
     if (data.type === "abort-stream") {
       callback();
@@ -193,7 +202,8 @@ export async function setupAbortCallback(
  * Update the keep-alive timestamp for a stream
  */
 export async function updateKeepAlive(appId: string): Promise<void> {
-  await redisPublisher.set(`app:${appId}:stream-state`, "running", {
+  const redisPub = await redisPublisher();
+  await redisPub.set(`app:${appId}:stream-state`, "running", {
     EX: 15,
   });
 }
