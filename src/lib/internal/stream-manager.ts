@@ -1,7 +1,6 @@
 import { UIMessage } from "ai";
 import { after } from "next/server";
 import { createResumableStreamContext } from "resumable-stream";
-import { redis, redisPublisher } from "./redis";
 import { AIService } from "./ai-service";
 import { Agent } from "@mastra/core/agent";
 import { FreestyleDevServerFilesystem } from "freestyle-sandboxes";
@@ -9,6 +8,12 @@ import { FreestyleDevServerFilesystem } from "freestyle-sandboxes";
 const streamContext = createResumableStreamContext({
   waitUntil: after,
 });
+
+// Helper function to get Redis clients dynamically
+async function getRedisClients() {
+  const { redis, redisPublisher } = await import("./redis");
+  return { redis: await redis(), redisPublisher: await redisPublisher() };
+}
 
 export interface StreamState {
   state: string | null;
@@ -27,8 +32,8 @@ export interface StreamInfo {
  * Get the current stream state for an app
  */
 export async function getStreamState(appId: string): Promise<StreamState> {
-  const redisPub = await redisPublisher();
-  const state = await redisPub.get(`app:${appId}:stream-state`);
+  const { redisPublisher } = await getRedisClients();
+  const state = await redisPublisher.get(`app:${appId}:stream-state`);
   return { state };
 }
 
@@ -36,8 +41,8 @@ export async function getStreamState(appId: string): Promise<StreamState> {
  * Check if a stream is currently running for an app
  */
 export async function isStreamRunning(appId: string): Promise<boolean> {
-  const redisPub = await redisPublisher();
-  const state = await redisPub.get(`app:${appId}:stream-state`);
+  const { redisPublisher } = await getRedisClients();
+  const state = await redisPublisher.get(`app:${appId}:stream-state`);
   return state === "running";
 }
 
@@ -45,12 +50,12 @@ export async function isStreamRunning(appId: string): Promise<boolean> {
  * Stop a running stream for an app
  */
 export async function stopStream(appId: string): Promise<void> {
-  const redisPub = await redisPublisher();
-  await redisPub.publish(
+  const { redisPublisher } = await getRedisClients();
+  await redisPublisher.publish(
     `events:${appId}`,
     JSON.stringify({ type: "abort-stream" })
   );
-  await redisPub.del(`app:${appId}:stream-state`);
+  await redisPublisher.del(`app:${appId}:stream-state`);
 }
 
 /**
@@ -61,8 +66,8 @@ export async function waitForStreamToStop(
   maxAttempts: number = 60
 ): Promise<boolean> {
   for (let i = 0; i < maxAttempts; i++) {
-    const redisPub = await redisPublisher();
-    const state = await redisPub.get(`app:${appId}:stream-state`);
+    const { redisPublisher } = await getRedisClients();
+    const state = await redisPublisher.get(`app:${appId}:stream-state`);
     if (!state) {
       return true;
     }
@@ -75,8 +80,8 @@ export async function waitForStreamToStop(
  * Clear the stream state for an app
  */
 export async function clearStreamState(appId: string): Promise<void> {
-  const redisPub = await redisPublisher();
-  await redisPub.del(`app:${appId}:stream-state`);
+  const { redisPublisher } = await getRedisClients();
+  await redisPublisher.del(`app:${appId}:stream-state`);
 }
 
 /**
@@ -136,8 +141,8 @@ export async function setStream(
     );
   }
 
-  const redisPub = await redisPublisher();
-  await redisPub.set(`app:${appId}:stream-state`, "running", {
+  const { redisPublisher } = await getRedisClients();
+  await redisPublisher.set(`app:${appId}:stream-state`, "running", {
     EX: 15,
   });
 
@@ -158,8 +163,8 @@ export async function setStream(
   return {
     response() {
       // Set up abort callback directly since this is a synchronous context
-      redis().then((redisClient: any) => {
-        redisClient.subscribe(`events:${appId}`, (event: any) => {
+      getRedisClients().then(({ redis }) => {
+        redis.subscribe(`events:${appId}`, (event: any) => {
           const data = JSON.parse(event);
           if (data.type === "abort-stream") {
             console.log("cancelling http stream");
@@ -189,8 +194,8 @@ export async function setupAbortCallback(
   appId: string,
   callback: () => void
 ): Promise<void> {
-  const redisClient = await redis();
-  redisClient.subscribe(`events:${appId}`, (event: any) => {
+  const { redis } = await getRedisClients();
+  redis.subscribe(`events:${appId}`, (event: any) => {
     const data = JSON.parse(event);
     if (data.type === "abort-stream") {
       callback();
@@ -202,8 +207,8 @@ export async function setupAbortCallback(
  * Update the keep-alive timestamp for a stream
  */
 export async function updateKeepAlive(appId: string): Promise<void> {
-  const redisPub = await redisPublisher();
-  await redisPub.set(`app:${appId}:stream-state`, "running", {
+  const { redisPublisher } = await getRedisClients();
+  await redisPublisher.set(`app:${appId}:stream-state`, "running", {
     EX: 15,
   });
 }
