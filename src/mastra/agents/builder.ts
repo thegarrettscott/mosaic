@@ -2,7 +2,6 @@ import { SYSTEM_MESSAGE } from "@/lib/system";
 import { anthropic } from "@ai-sdk/anthropic";
 import { Agent } from "@mastra/core/agent";
 import { Memory } from "@mastra/memory";
-import { PostgresStore, PgVector } from "@mastra/pg";
 import { todoTool } from "@/tools/todo-tool";
 
 export const memory = new Memory({
@@ -13,12 +12,6 @@ export const memory = new Memory({
       generateTitle: true,
     },
   },
-  vector: new PgVector({
-    connectionString: process.env.DATABASE_URL!,
-  }),
-  storage: new PostgresStore({
-    connectionString: process.env.DATABASE_URL!,
-  }),
   processors: [],
 });
 
