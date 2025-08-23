@@ -1,20 +1,28 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { ExampleButton } from "@/components/ExampleButton";
 import { AuthButton } from "@/components/auth-button";
 import { UserApps } from "@/components/user-apps";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
-
 const queryClient = new QueryClient();
 
 export default function Home() {
   const [isLoading, setIsLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const msg = searchParams.get('message');
+    if (msg) {
+      setMessage(msg);
+    }
+  }, [searchParams]);
 
   const handleOpenInbox = async () => {
     setIsLoading(true);
@@ -38,6 +46,12 @@ export default function Home() {
             <p className="text-neutral-600 text-center mb-6 text-3xl sm:text-4xl md:text-5xl font-bold">
               Welcome to Mosaic
             </p>
+
+            {message && (
+              <div className="w-full max-w-md mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg text-center">
+                <p className="text-blue-800 text-sm">{message}</p>
+              </div>
+            )}
 
             <div className="w-full relative my-5 flex justify-center">
               <Button

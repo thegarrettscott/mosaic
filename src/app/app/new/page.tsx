@@ -15,22 +15,8 @@ export default async function NewAppRedirectPage({
   const search = await searchParams;
 
   if (!user) {
-    // reconstruct the search params
-    const newParams = new URLSearchParams();
-    Object.entries(search).forEach(([key, value]) => {
-      if (Array.isArray(value)) {
-        value.forEach((v) => newParams.append(key, v));
-      } else {
-        newParams.set(key, value);
-      }
-    });
-
-    // After sign in, redirect back to this page with the initial search params
-    redirect(
-      `/handler/sign-in?after_auth_return_to=${encodeURIComponent(
-        "/app/new?" + newParams.toString()
-      )}`
-    );
+    // If no user, redirect to home page with a message to sign in first
+    redirect(`/?message=Please sign in to create your first inbox`);
   }
 
   let message: string | undefined;
