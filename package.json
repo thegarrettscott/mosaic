@@ -30,6 +30,7 @@
     "@supabase/supabase-js": "^2.56.0",
     "@tanstack/react-query": "^5.74.11",
     "ai": "^5.0.0-beta.25",
+    "autoprefixer": "^10.4.21",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "dotenv": "^16.5.0",
@@ -63,7 +64,6 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
-    "@tailwindcss/postcss": "^4.1.3",
     "@tailwindcss/typography": "^0.5.16",
     "@types/node": "^20.17.32",
     "@types/react": "^18.3.23",
@@ -72,7 +72,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.3.0",
     "freestyle-sh": "^0.4.31",
-    "tailwindcss": "^4.1.3",
+    "tailwindcss": "^3.4.0",
     "tsx": "^4.19.3",
     "typescript": "^5"
   }
