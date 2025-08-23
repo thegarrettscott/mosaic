@@ -12,6 +12,9 @@ export const memory = new Memory({
       generateTitle: true,
     },
   },
+  storage: {
+    type: "memory",
+  },
   processors: [],
 });
 
