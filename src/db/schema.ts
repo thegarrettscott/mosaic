@@ -6,60 +6,30 @@ import {
   json,
   pgEnum,
 } from "drizzle-orm/pg-core";
-import { drizzle } from "drizzle-orm/node-postgres";
-import { Pool } from "pg";
+import { drizzle } from "drizzle-orm/postgres-js";
+import postgres from "postgres";
+import { createClient } from "@supabase/supabase-js";
+
+// Create Supabase client
+export const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL!,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+);
+
+// Create postgres connection for Drizzle
+const client = postgres(process.env.DATABASE_URL!);
+export const db = drizzle(client);
 
 import type { UIMessage } from "ai";
 
-let dbInstance: any = null;
-let connectionError: Error | null = null;
-
-export function getDb() {
-  if (connectionError) {
-    throw connectionError;
-  }
-  
-  if (!dbInstance) {
-    try {
-      if (!process.env.DATABASE_URL) {
-        throw new Error("DATABASE_URL environment variable is not set");
-      }
-      
-      const pool = new Pool({
-        connectionString: process.env.DATABASE_URL,
-        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-      });
-      
-      dbInstance = drizzle(pool);
-    } catch (error) {
-      connectionError = error as Error;
-      console.error("Failed to initialize database:", error);
-      throw error;
-    }
-  }
-  return dbInstance;
-}
-
-// Keep the old export for backward compatibility, but make it lazy
-export const db = new Proxy({}, {
-  get(target, prop) {
-    try {
-      const dbClient = getDb();
-      return dbClient[prop];
-    } catch (error) {
-      console.error("Database operation failed:", error);
-      throw error;
-    }
-  }
-});
-
+// App Builder Tables - these will be added to your existing email system
 export const appsTable = pgTable("apps", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: text("name").notNull().default("Unnamed App"),
   description: text("description").notNull().default("No description"),
   gitRepo: text("git_repo").notNull(),
   createdAt: timestamp("created_at").notNull().defaultNow(),
-  baseId: text("base_id").notNull().default("nextjs-dkjfgdf"),
+  baseId: text("base_id").notNull().default("superhuman"),
   previewDomain: text("preview_domain").unique(),
 });
 
